@@ -22,6 +22,8 @@ import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.callback.FlywayCallback;
 import org.flywaydb.core.api.configuration.FlywayConfiguration;
 import org.flywaydb.core.api.resolver.MigrationResolver;
+import org.flywaydb.core.api.resolver.ResolvedMigrationEmptyFilter;
+import org.flywaydb.core.api.resolver.ResolvedMigrationFilter;
 import org.flywaydb.core.internal.callback.SqlScriptFlywayCallback;
 import org.flywaydb.core.internal.command.DbBaseline;
 import org.flywaydb.core.internal.command.DbClean;
@@ -282,6 +284,8 @@ public class Flyway implements FlywayConfiguration {
      */
     private MigrationResolver[] resolvers = new MigrationResolver[0];
 
+    private ResolvedMigrationFilter migrationFilter = ResolvedMigrationEmptyFilter.instance();
+
     /**
      * Whether Flyway should skip the default resolvers. If true, only custom resolvers are used.
      * <p>(default: false)</p>
@@ -460,6 +464,11 @@ public class Flyway implements FlywayConfiguration {
     @Override
     public MigrationResolver[] getResolvers() {
         return resolvers;
+    }
+
+    @Override
+    public ResolvedMigrationFilter getMigrationFilter() {
+        return migrationFilter;
     }
 
     @Override
@@ -907,6 +916,18 @@ public class Flyway implements FlywayConfiguration {
     public void setResolversAsClassNames(String... resolvers) {
         List<MigrationResolver> resolverList = ClassUtils.instantiateAll(resolvers, classLoader);
         setResolvers(resolverList.toArray(new MigrationResolver[resolvers.length]));
+    }
+
+    public void setMigrationFilter(ResolvedMigrationFilter migrationFilter) {
+        this.migrationFilter = migrationFilter;
+    }
+
+    public void setMigrationFilterAsClassName(String migrationFilter) {
+        try {
+            this.migrationFilter = ClassUtils.instantiate(migrationFilter, classLoader);
+        } catch (Exception e) {
+            throw new FlywayException("Unable to instantiate class: " + migrationFilter);
+        }
     }
 
     /**

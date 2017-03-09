@@ -17,8 +17,7 @@ package org.flywaydb.core.internal.resolver;
 
 import org.flywaydb.core.api.FlywayException;
 import org.flywaydb.core.api.configuration.FlywayConfiguration;
-import org.flywaydb.core.api.resolver.MigrationResolver;
-import org.flywaydb.core.api.resolver.ResolvedMigration;
+import org.flywaydb.core.api.resolver.*;
 import org.flywaydb.core.internal.dbsupport.DbSupport;
 import org.flywaydb.core.internal.resolver.jdbc.JdbcMigrationResolver;
 import org.flywaydb.core.internal.resolver.spring.SpringJdbcMigrationResolver;
@@ -78,6 +77,16 @@ public class CompositeMigrationResolver implements MigrationResolver {
         }
 
         migrationResolvers.addAll(Arrays.asList(customMigrationResolvers));
+        decorateAllResolverByFilter(configuration);
+    }
+
+    private void decorateAllResolverByFilter(FlywayConfiguration configuration) {
+        ResolvedMigrationFilter filter = configuration.getMigrationFilter();
+        Collection<MigrationResolver> decoratedMigrationResolvers = new ArrayList<MigrationResolver>();
+        for (MigrationResolver resolver : migrationResolvers) {
+            decoratedMigrationResolvers.add(new FilteredMigrationResolver(resolver, filter));
+        }
+        migrationResolvers = decoratedMigrationResolvers;
     }
 
     /**

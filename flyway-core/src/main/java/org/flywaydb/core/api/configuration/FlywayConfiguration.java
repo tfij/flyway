@@ -18,6 +18,7 @@ package org.flywaydb.core.api.configuration;
 import org.flywaydb.core.api.MigrationVersion;
 import org.flywaydb.core.api.callback.FlywayCallback;
 import org.flywaydb.core.api.resolver.MigrationResolver;
+import org.flywaydb.core.api.resolver.ResolvedMigrationFilter;
 
 import javax.sql.DataSource;
 import java.util.Map;
@@ -62,6 +63,8 @@ public interface FlywayConfiguration {
      * (default: none)
      */
     MigrationResolver[] getResolvers();
+
+    ResolvedMigrationFilter getMigrationFilter();
 
     /**
      * Whether Flyway should skip the default resolvers. If true, only custom resolvers are used.
